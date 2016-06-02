@@ -123,7 +123,7 @@ public class WelcomeEmailSender {
 		sb.append("<p>Step 3: Access your dashboard<br><i>Measure your expertise, mentorship and influence within and outside of your team</i></p>");
 
 		sb.append("<a href=http://ec2-52-35-113-15.us-west-2.compute.amazonaws.com:8080/login.jsp><i><b>Log in to My account now</b></i></a>");
-		sb.append("<p>If you have feedback or need any help, I am standing by. Just send me an email at support@owenanalytics.com</p> <p>Follow me on Twitter @owenanalytics for useful tips</p>");
+		sb.append("<p>If you have feedback or need any help, I am standing by. Just send me an email at support@owenanalytics.com</p> <p>Follow me on Twitter @owen_analytics </p>");
 
 		sb.append("</div>");
 
