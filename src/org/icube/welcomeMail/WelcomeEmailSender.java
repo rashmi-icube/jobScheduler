@@ -63,7 +63,7 @@ public class WelcomeEmailSender {
 				ResultSet employeeDetails = null;
 				stmt = companyCon.createStatement();
 				employeeDetails = stmt
-						.executeQuery("select l.login_id,l.password,e.first_name,e.last_name from login_table as l join employee as e on e.emp_id=l.emp_id");
+						.executeQuery("select l.login_id,l.password,e.first_name,e.last_name from login_table as l join employee as e on e.emp_id=l.emp_id where l.status = 'active'");
 				while (employeeDetails.next()) {
 					sendWelcomeEmail(employeeDetails.getString("login_id"),
 							employeeDetails.getString("password"),
@@ -171,8 +171,8 @@ public class WelcomeEmailSender {
 					sb.append("<P style=\"MARGIN-BOTTOM: 1em;\"><B>Password: </B>"
 							+ password + "</P>");
 				} else if (str
-						.contains("<DIV>You are receiving this email because your email@address.com is registered with OWEN</DIV>")) {
-					sb.append("<DIV>You are receiving this email because your "
+						.contains("<DIV>You are receiving this email because email@address.com is registered with OWEN</DIV>")) {
+					sb.append("<DIV>You are receiving this email because "
 							+ username + " is registered with OWEN</DIV>");
 				} else {
 					sb.append(str);
