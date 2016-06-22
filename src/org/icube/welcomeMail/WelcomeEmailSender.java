@@ -1,6 +1,7 @@
 package org.icube.welcomeMail;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -136,29 +137,10 @@ public class WelcomeEmailSender {
 	private StringBuilder getWelcomeEmailText(String username,
 			String firstName, String password) {
 		StringBuilder sb = new StringBuilder();
-
-		sb.append("<html>");
-		sb.append("<body>");
-
-		sb.append("<p><b><i>WELCOME TO MY NETWORK, " + firstName
-				+ ". I'M SO EXCITED YOU'RE HERE...</i></b></p>");
-		sb.append("<p>I am on a mission to help you engage better at your workplace, by answering small surveys. This should be easy.</p>");
-		sb.append("<p>Get started right away with just a few simple steps. And don't worry, I'll send you little reminders to answer my surveys. I'm nice like that.");
-		sb.append("<p>Your Login Credentials : </p>");
-		sb.append("<p><b>Username : " + username + "</b><br><b>Password : "
-				+ password + " </b></p>");
-		sb.append("<p>When I created your profile, I didn't ask you to setup a password. It's time to update your password now.</p>");
-		sb.append("<p>Step 1: Update your User Profile<br><i>Go to the Settings page and setup a profile picture, update your work experience, education and more</i></p>");
-		sb.append("<p>Step 2: Answer a survey<br><i>Give stars to people you like, to show them your appreciation</i></p>");
-		sb.append("<p>Step 3: Access your dashboard<br><i>Measure your expertise, mentorship and influence within and outside of your team</i></p>");
-
-		sb.append("<a href=http://ec2-52-35-113-15.us-west-2.compute.amazonaws.com:8080/login.jsp><i><b>Log in to My account now</b></i></a>");
-		sb.append("<p>If you have feedback or need any help, I am standing by. Just send me an email at support@owenanalytics.com</p> <p>Follow me on Twitter @owen_analytics </p>");
-
-		sb.append("</div>");
-
+		File file = new File("html/welcomeOwenMail.html");
+		System.out.println(file.getAbsolutePath());
 		try (BufferedReader in = new BufferedReader(new FileReader(
-				"C:\\Owen\\WelcomeOWENMail.html"))) {
+				file.getAbsolutePath()))) {
 			String str;
 			int index = username.indexOf('@');
 			String uname = username.substring(0, index + 1);
