@@ -1,5 +1,8 @@
 package org.icube.welcomeMail;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.sql.Connection;
@@ -20,9 +23,12 @@ public class WelcomeEmailSender {
 
 	public Connection masterCon;
 	public Connection companyCon;
-	private final static String MASTER_URL = UtilHelper.getConfigProperty("master_sql_url");
-	private final static String MASTER_USER = UtilHelper.getConfigProperty("master_sql_user");
-	private final static String MASTER_PASSWORD = UtilHelper.getConfigProperty("master_sql_password");
+	private final static String MASTER_URL = UtilHelper
+			.getConfigProperty("master_sql_url");
+	private final static String MASTER_USER = UtilHelper
+			.getConfigProperty("master_sql_user");
+	private final static String MASTER_PASSWORD = UtilHelper
+			.getConfigProperty("master_sql_password");
 
 	public void connectToDb(int companyId) {
 		ResultSet companyDetails = null;
@@ -30,49 +36,66 @@ public class WelcomeEmailSender {
 		// master sql connection
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
-			masterCon = (masterCon != null && !masterCon.isValid(0)) ? masterCon : DriverManager.getConnection(MASTER_URL, MASTER_USER,
-					MASTER_PASSWORD);
-			org.apache.log4j.Logger.getLogger(WelcomeEmailSender.class).debug("Successfully connected to MySql with master database");
+			masterCon = (masterCon != null && !masterCon.isValid(0)) ? masterCon
+					: DriverManager.getConnection(MASTER_URL, MASTER_USER,
+							MASTER_PASSWORD);
+			org.apache.log4j.Logger.getLogger(WelcomeEmailSender.class).debug(
+					"Successfully connected to MySql with master database");
 			stmt = masterCon.createStatement();
-			companyDetails = stmt.executeQuery("SELECT comp_sql_dbname,sql_server,sql_user_id,sql_password FROM company_master where comp_id="
-					+ companyId);
+			companyDetails = stmt
+					.executeQuery("SELECT comp_sql_dbname,sql_server,sql_user_id,sql_password FROM company_master where comp_id="
+							+ companyId);
 			companyDetails.next();
-			String sqlUrl = "jdbc:mysql://" + companyDetails.getString("sql_server") + ":3306/" + companyDetails.getString("comp_sql_dbname");
+			String sqlUrl = "jdbc:mysql://"
+					+ companyDetails.getString("sql_server") + ":3306/"
+					+ companyDetails.getString("comp_sql_dbname");
 			String sqlUserName = companyDetails.getString("sql_user_id");
 			String sqlPassword = companyDetails.getString("sql_password");
 			try {
 				Class.forName("com.mysql.jdbc.Driver");
-				companyCon = (companyCon != null && !companyCon.isValid(0)) ? companyCon : DriverManager.getConnection(sqlUrl, sqlUserName,
-						sqlPassword);
-				org.apache.log4j.Logger.getLogger(WelcomeEmailSender.class).debug("Successfully connected to MySql with company database");
+				companyCon = (companyCon != null && !companyCon.isValid(0)) ? companyCon
+						: DriverManager.getConnection(sqlUrl, sqlUserName,
+								sqlPassword);
+				org.apache.log4j.Logger
+						.getLogger(WelcomeEmailSender.class)
+						.debug("Successfully connected to MySql with company database");
 				ResultSet employeeDetails = null;
 				stmt = companyCon.createStatement();
 				employeeDetails = stmt
 						.executeQuery("select l.login_id,l.password,e.first_name,e.last_name from login_table as l join employee as e on e.emp_id=l.emp_id");
 				while (employeeDetails.next()) {
-					sendWelcomeEmail(employeeDetails.getString("login_id"), employeeDetails.getString("password"), employeeDetails
-							.getString("first_name"));
+					sendWelcomeEmail(employeeDetails.getString("login_id"),
+							employeeDetails.getString("password"),
+							employeeDetails.getString("first_name"));
 				}
 
 			} catch (SQLException | ClassNotFoundException e) {
-				org.apache.log4j.Logger.getLogger(WelcomeEmailSender.class).error(
-						"An error occurred while connecting to the company database on : " + sqlUrl + " with user name : " + sqlUserName, e);
+				org.apache.log4j.Logger
+						.getLogger(WelcomeEmailSender.class)
+						.error("An error occurred while connecting to the company database on : "
+								+ sqlUrl + " with user name : " + sqlUserName,
+								e);
 			}
 
 		} catch (SQLException | ClassNotFoundException e) {
 			org.apache.log4j.Logger.getLogger(WelcomeEmailSender.class).error(
-					"An error occurred while connecting to the master database on : " + MASTER_URL + " with user name : " + MASTER_USER, e);
+					"An error occurred while connecting to the master database on : "
+							+ MASTER_URL + " with user name : " + MASTER_USER,
+					e);
 		}
 		try {
 			masterCon.close();
 			companyCon.close();
 		} catch (SQLException e) {
-			org.apache.log4j.Logger.getLogger(WelcomeEmailSender.class).error("An error occurred while closing the database connections", e);
+			org.apache.log4j.Logger.getLogger(WelcomeEmailSender.class).error(
+					"An error occurred while closing the database connections",
+					e);
 		}
 
 	}
 
-	public void sendWelcomeEmail(String address, String empPassword, String firstName) {
+	public void sendWelcomeEmail(String address, String empPassword,
+			String firstName) {
 		String host = "smtp.zoho.com";
 		String username = "owen@owenanalytics.com";
 		String password = "Abcd@654321";
@@ -93,30 +116,37 @@ public class WelcomeEmailSender {
 			try {
 				ipAddr = InetAddress.getLocalHost();
 			} catch (Exception e) {
-				org.apache.log4j.Logger.getLogger(WelcomeEmailSender.class).debug("Unable to get the ip");
+				org.apache.log4j.Logger.getLogger(WelcomeEmailSender.class)
+						.debug("Unable to get the ip");
 			}
 			System.out.println(ipAddr.getHostAddress());
 			// for (String adr : addresses) {
-			msg.setContent(getWelcomeEmailText(address, firstName, empPassword).toString(), "text/html");
+			msg.setContent(getWelcomeEmailText(address, firstName, empPassword)
+					.toString(), "text/html");
 			msg.setRecipients(Message.RecipientType.TO, address);
 			Transport.send(msg, username, password);
 			// }
 
 		} catch (MessagingException | UnsupportedEncodingException e) {
-			org.apache.log4j.Logger.getLogger(WelcomeEmailSender.class).error("Error in sending Emails for current questions", e);
+			org.apache.log4j.Logger.getLogger(WelcomeEmailSender.class).error(
+					"Error in sending Emails for current questions", e);
 		}
 	}
 
-	private StringBuilder getWelcomeEmailText(String username, String firstName, String password) {
+	private StringBuilder getWelcomeEmailText(String username,
+			String firstName, String password) {
 		StringBuilder sb = new StringBuilder();
+
 		sb.append("<html>");
 		sb.append("<body>");
 
-		sb.append("<p><b><i>WELCOME TO MY NETWORK, " + firstName + ". I'M SO EXCITED YOU'RE HERE...</i></b></p>");
+		sb.append("<p><b><i>WELCOME TO MY NETWORK, " + firstName
+				+ ". I'M SO EXCITED YOU'RE HERE...</i></b></p>");
 		sb.append("<p>I am on a mission to help you engage better at your workplace, by answering small surveys. This should be easy.</p>");
 		sb.append("<p>Get started right away with just a few simple steps. And don't worry, I'll send you little reminders to answer my surveys. I'm nice like that.");
 		sb.append("<p>Your Login Credentials : </p>");
-		sb.append("<p><b>Username : " + username + "</b><br><b>Password : " + password + " </b></p>");
+		sb.append("<p><b>Username : " + username + "</b><br><b>Password : "
+				+ password + " </b></p>");
 		sb.append("<p>When I created your profile, I didn't ask you to setup a password. It's time to update your password now.</p>");
 		sb.append("<p>Step 1: Update your User Profile<br><i>Go to the Settings page and setup a profile picture, update your work experience, education and more</i></p>");
 		sb.append("<p>Step 2: Answer a survey<br><i>Give stars to people you like, to show them your appreciation</i></p>");
@@ -127,8 +157,49 @@ public class WelcomeEmailSender {
 
 		sb.append("</div>");
 
-		sb.append("</body>");
-		sb.append("</html>");
+		try (BufferedReader in = new BufferedReader(new FileReader(
+				"C:\\Owen\\WelcomeOWENMail.html"))) {
+			String str;
+			int index = username.indexOf('@');
+			String uname = username.substring(0, index + 1);
+			int comIndex = username.indexOf('.');
+			String compName = username.substring(index + 1, comIndex + 1);
+			String dom = username.substring(comIndex + 1);
+			while ((str = in.readLine()) != null) {
+				if (str.contains("Welcome to my network")) {
+					sb.append("<P style=\"MARGIN-BOTTOM: 14px; MIN-HEIGHT: 20px\">Welcome to my network, <B style=\"color:#388E3C;\"> "
+							+ firstName
+							+ "</B>. I'm so excited you're here...</P>");
+				}
+
+				else if (str
+						.contains("<B>Username: </B><A href=\"\" style=\"text-decoration: none; cursor: text; pointer-events: none !important; color: #000000;\"><SPAN style=\"text-decoration: none; cursor: text; color: #000000;\">user@</SPAN><SPAN style=\"text-decoration: none; cursor: text; color: #000000;\">name.</SPAN><SPAN style=\"text-decoration: none; cursor: text; color: #000000;\">&#65279;com</SPAN></A></P>")) {
+					sb.append("<B>Username: </B><A href=\"\" style=\"text-decoration: none; cursor: text; pointer-events: none !important; color: #000000;\"><SPAN style=\"text-decoration: none; cursor: text; color: #000000;\"> "
+							+ uname
+							+ "</SPAN><SPAN style=\"text-decoration: none; cursor: text; color: #000000;\">"
+							+ compName
+							+ "</SPAN><SPAN style=\"text-decoration: none; cursor: text; color: #000000;\">&#65279;"
+							+ dom + "</SPAN></A></P>");
+				} else if (str
+						.contains("<P style=\"MARGIN-BOTTOM: 1em;\"><B>Username: </B>username</P>")) {
+					sb.append("<P style=\"MARGIN-BOTTOM: 1em;\"><B>Username: </B> "
+							+ username + "</P>");
+				} else if (str
+						.contains("<P style=\"MARGIN-BOTTOM: 1em;\"><B>Password: </B>password</P>")) {
+					sb.append("<P style=\"MARGIN-BOTTOM: 1em;\"><B>Password: </B>"
+							+ password + "</P>");
+				} else if (str
+						.contains("<DIV>You are receiving this email because your email@address.com is registered with OWEN</DIV>")) {
+					sb.append("<DIV>You are receiving this email because your "
+							+ username + " is registered with OWEN</DIV>");
+				} else {
+					sb.append(str);
+				}
+			}
+		} catch (IOException e) {
+			System.out.println(e);
+		}
+		System.out.println(sb.toString());
 		return sb;
 	}
 }
