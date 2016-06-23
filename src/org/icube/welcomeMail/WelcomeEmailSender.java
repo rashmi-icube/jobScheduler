@@ -171,9 +171,8 @@ public class WelcomeEmailSender {
 					sb.append("<P style=\"MARGIN-BOTTOM: 1em;\"><B>Password: </B>"
 							+ password + "</P>");
 				} else if (str
-						.contains("<DIV>You are receiving this email because email@address.com is registered with OWEN</DIV>")) {
-					sb.append("<DIV>You are receiving this email because "
-							+ username + " is registered with OWEN</DIV>");
+						.contains("<DIV>You are receiving this email because email@address.com is registered with OWEN.</DIV>")) {
+					sb.append("<DIV>You are receiving this email because " + username + " is registered with OWEN.</DIV>");
 				} else {
 					sb.append(str);
 				}
