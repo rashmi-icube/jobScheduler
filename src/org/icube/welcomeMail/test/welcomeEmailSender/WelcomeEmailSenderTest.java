@@ -9,8 +9,8 @@ public class WelcomeEmailSenderTest {
 	WelcomeEmailSender wes = new WelcomeEmailSender();
 	
 	@Test
-	public void testConnectToDb(){
-		wes.connectToDb(2);
+	public void testConnectToDb() throws InterruptedException{
+		wes.connectToDb(3);
 	}
 
 }
