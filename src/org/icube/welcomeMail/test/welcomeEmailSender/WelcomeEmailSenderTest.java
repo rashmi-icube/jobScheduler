@@ -10,7 +10,7 @@ public class WelcomeEmailSenderTest {
 	
 	@Test
 	public void testConnectToDb() throws InterruptedException{
-		wes.connectToDb(3);
+		wes.connectToDb(1);
 	}
 
 }

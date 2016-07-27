@@ -125,8 +125,8 @@ public class WelcomeEmailSender {
 			String compName = username.substring(index + 1, comIndex + 1);
 			String dom = username.substring(comIndex + 1);
 			while ((str = in.readLine()) != null) {
-				if (str.contains("<P style=\"MARGIN-BOTTOM: 14px; MIN-HEIGHT: 20px\">Hi <B style=\"color:#388E3C ;\">[PERSONNAME]</B>,</P>")) {
-					sb.append("<P style=\"MARGIN-BOTTOM: 14px; MIN-HEIGHT: 20px\">Hi <B style=\"color:#388E3C ;\"> " + firstName + "</B>,</P>");
+				if (str.contains("<P style=\"MARGIN-BOTTOM: 14px; MIN-HEIGHT: 20px\">Hi <B style=\"color:#388E3C;\">[PERSONNAME]</B>,</P>")) {
+					sb.append("<P style=\"MARGIN-BOTTOM: 14px; MIN-HEIGHT: 20px\">Hi <B style=\"color:#388E3C;\"> " + firstName + "</B>,</P>");
 				}
 
 				else if (str
@@ -147,7 +147,7 @@ public class WelcomeEmailSender {
 				}
 			}
 		} catch (IOException e) {
-			System.out.println(e);
+			org.apache.log4j.Logger.getLogger(WelcomeEmailSender.class).debug("Unable to build the email text for the welcome mail", e);
 		}
 		System.out.println(sb.toString());
 		return sb;
